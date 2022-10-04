@@ -16,6 +16,15 @@ async fn main() -> anyhow::Result<()> {
     .dm_permission(false)
     .build();
 
+  let persist_command = CommandBuilder::new(
+    "persist",
+    "Make a button to get roles",
+    CommandType::ChatInput,
+  )
+  .dm_permission(false)
+  .default_member_permissions(Permissions::MANAGE_ROLES)
+  .build();
+
   let config_command = CommandBuilder::new(
     "config",
     "Manage selfroles for the server",
@@ -71,7 +80,7 @@ async fn main() -> anyhow::Result<()> {
 
   client
     .interaction(app_id)
-    .set_global_commands(&[roles_command, config_command])
+    .set_global_commands(&[roles_command, persist_command, config_command])
     .exec()
     .await?;
 

@@ -32,6 +32,7 @@ pub async fn handle_command(
       )
       .await
     }
+    (CommandType::ChatInput, "persist") => roles::persist(),
     (CommandType::ChatInput, "config") => match command.options.get(0) {
       Some(CommandDataOption {
         name,
@@ -60,6 +61,14 @@ pub async fn handle_menu(
   match (component.component_type, component.custom_id.as_str()) {
     (ComponentType::SelectMenu, "roleMenu") => {
       roles::select::exec(state, interaction, component).await
+    }
+    (ComponentType::Button, "selectRoles") => {
+      roles::roles_command(
+        state,
+        interaction.guild_id.unwrap(),
+        interaction.author_id().unwrap(),
+      )
+      .await
     }
     _ => unreachable!(),
   }
