@@ -1,3 +1,4 @@
+use twilight_http::{api_error::ApiError, error::ErrorType};
 use twilight_model::{
   application::interaction::InteractionData,
   channel::message::MessageFlags,
@@ -22,14 +23,27 @@ pub async fn interaction_dispatcher(
     }
     _ => unreachable!(),
   }
-  .unwrap_or_else(|err| InteractionResponse {
-    kind: InteractionResponseType::ChannelMessageWithSource,
-    data: Some(
-      InteractionResponseDataBuilder::new()
-        .content(err.to_string())
-        .flags(MessageFlags::EPHEMERAL)
-        .build(),
-    ),
+  .unwrap_or_else(|err| {
+    let err_message = match err.downcast::<twilight_http::Error>() {
+      Ok(e) => match e.kind() {
+        ErrorType::Response {
+          error: ApiError::General(error),
+          ..
+        } => error.message.clone(),
+        _ => e.to_string(),
+      },
+      Err(e) => e.to_string(),
+    };
+
+    InteractionResponse {
+      kind: InteractionResponseType::ChannelMessageWithSource,
+      data: Some(
+        InteractionResponseDataBuilder::new()
+          .content(format!("Sorry, an error occured: {}\nPlease contact an administrator about this.", err_message))
+          .flags(MessageFlags::EPHEMERAL)
+          .build(),
+      ),
+    }
   });
 
   let client = state.client.interaction(state.app_id);
