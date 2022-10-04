@@ -33,7 +33,7 @@ pub async fn exec(
   if self_roles.is_empty() {
     let response = InteractionResponseDataBuilder::new()
       .flags(MessageFlags::EPHEMERAL)
-      .content("Sorry, there are no roles to pick from. Contact server administrator to see if this is intentional.")
+      .content("Sorry, there are no roles to pick from. Contact server administrator to check if this is intentional.")
       .build();
 
     return Ok(InteractionResponse {
