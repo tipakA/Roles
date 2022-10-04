@@ -116,12 +116,10 @@ async fn config_add_command(
       _ => None,
     })
     .unwrap();
-  let p_label = options
-    .iter()
-    .find_map(|option| match &option.value {
-      CommandOptionValue::String(label) if option.name == "label" => Some(label),
-      _ => None,
-    });
+  let p_label = options.iter().find_map(|option| match &option.value {
+    CommandOptionValue::String(label) if option.name == "label" => Some(label),
+    _ => None,
+  });
   let p_description = options.iter().find_map(|option| match &option.value {
     CommandOptionValue::String(label) if option.name == "description" => Some(label),
     _ => None,
@@ -409,7 +407,10 @@ async fn interaction_dispatcher(
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-  dotenvy::dotenv()?;
+  if let Err(error) = dotenvy::dotenv() {
+    tracing::warn!("Missing .env file\n{}", error);
+  }
+
   tracing_subscriber::fmt::init();
 
   let (cluster, mut events) = Cluster::new(env::var("TOKEN")?, Intents::empty()).await?;
