@@ -1,5 +1,7 @@
 use twilight_model::{
-  application::component::{select_menu::SelectMenuOption, ActionRow, Component, SelectMenu},
+  application::component::{
+    button::ButtonStyle, select_menu::SelectMenuOption, ActionRow, Button, Component, SelectMenu,
+  },
   channel::message::MessageFlags,
   http::interaction::{InteractionResponse, InteractionResponseType},
   id::{
@@ -72,6 +74,29 @@ pub async fn roles_command(
     .components([select])
     .flags(MessageFlags::EPHEMERAL)
     .content("Select all the roles you want, and click out of the menu to confirm.")
+    .build();
+
+  Ok(InteractionResponse {
+    data: Some(response),
+    kind: InteractionResponseType::ChannelMessageWithSource,
+  })
+}
+
+pub fn persist() -> anyhow::Result<InteractionResponse> {
+  let button = Component::ActionRow(ActionRow {
+    components: vec![Component::Button(Button {
+      custom_id: Some("selectRoles".to_string()),
+      disabled: false,
+      emoji: None,
+      label: Some("Get Roles".to_string()),
+      style: ButtonStyle::Primary,
+      url: None,
+    })],
+  });
+
+  let response = InteractionResponseDataBuilder::new()
+    .components([button])
+    .content("GET ROLES HERE")
     .build();
 
   Ok(InteractionResponse {
