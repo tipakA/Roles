@@ -14,9 +14,13 @@ Creates a select menu with currently available roles to pick from. The menu will
 
 `/config add`
 
-Make a role be self-assignable. `label` is the role name displayed in the menu.  
+Make a role be self-assignable. `label` and `description` are displayed in the menu.  
 You can update exising selfrole by adding it again.
 
 `/config remove`
 
 Remove a role from the list.
+
+`/persist`
+
+Create a button to invoke the menu without using the command. Useful for locked channels.
