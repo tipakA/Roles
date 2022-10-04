@@ -1,6 +1,10 @@
 use twilight_model::{
-  application::interaction::InteractionData, gateway::payload::incoming::InteractionCreate,
+  application::interaction::InteractionData,
+  channel::message::MessageFlags,
+  gateway::payload::incoming::InteractionCreate,
+  http::interaction::{InteractionResponse, InteractionResponseType},
 };
+use twilight_util::builder::InteractionResponseDataBuilder;
 
 use crate::{commands, State};
 
@@ -11,13 +15,22 @@ pub async fn interaction_dispatcher(
 ) -> anyhow::Result<()> {
   let response = match interaction.data {
     Some(InteractionData::ApplicationCommand(ref command)) => {
-      commands::handle_command(state.clone(), command, &interaction).await?
+      commands::handle_command(state.clone(), command, &interaction).await
     }
     Some(InteractionData::MessageComponent(ref component)) => {
-      commands::handle_menu(state.clone(), interaction.clone(), component).await?
+      commands::handle_menu(state.clone(), interaction.clone(), component).await
     }
     _ => unreachable!(),
-  };
+  }
+  .unwrap_or_else(|err| InteractionResponse {
+    kind: InteractionResponseType::ChannelMessageWithSource,
+    data: Some(
+      InteractionResponseDataBuilder::new()
+        .content(err.to_string())
+        .flags(MessageFlags::EPHEMERAL)
+        .build(),
+    ),
+  });
 
   let client = state.client.interaction(state.app_id);
   client

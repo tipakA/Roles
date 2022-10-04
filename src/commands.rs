@@ -37,9 +37,7 @@ pub async fn handle_command(
       Some(CommandDataOption {
         name,
         value: CommandOptionValue::SubCommand(options),
-      }) if name == "add" => {
-        config::add::exec(state, options, interaction.guild_id.unwrap()).await
-      }
+      }) if name == "add" => config::add::exec(state, options, interaction.guild_id.unwrap()).await,
       Some(CommandDataOption {
         name,
         value: CommandOptionValue::SubCommand(options),
@@ -63,7 +61,7 @@ pub async fn handle_menu(
       roles::select::exec(state, interaction, component).await
     }
     (ComponentType::Button, "selectRoles") => {
-      roles::roles_command(
+      roles::exec(
         state,
         interaction.guild_id.unwrap(),
         interaction.author_id().unwrap(),
