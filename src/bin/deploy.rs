@@ -1,9 +1,9 @@
 use std::env;
 use twilight_http::client::ClientBuilder;
-use twilight_model::application::command::{
+use twilight_model::{application::command::{
   BaseCommandOptionData, ChoiceCommandOptionData, CommandOption, CommandType,
   OptionsCommandOptionData,
-};
+}, guild::Permissions};
 use twilight_util::builder::command::CommandBuilder;
 
 #[tokio::main]
@@ -19,6 +19,7 @@ async fn main() -> anyhow::Result<()> {
     CommandType::ChatInput,
   )
   .dm_permission(false)
+  .default_member_permissions(Permissions::MANAGE_ROLES)
   .option(CommandOption::SubCommand(OptionsCommandOptionData {
     name: "add".to_string(),
     description: "Add new selfrole".to_string(),
