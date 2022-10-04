@@ -18,7 +18,7 @@ async fn main() -> anyhow::Result<()> {
 
   let persist_command = CommandBuilder::new(
     "persist",
-    "Make a persistent select menu (reuse this command after changing roles)",
+    "Make a button to get roles",
     CommandType::ChatInput,
   )
   .dm_permission(false)
