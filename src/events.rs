@@ -39,7 +39,10 @@ pub async fn interaction_dispatcher(
       kind: InteractionResponseType::ChannelMessageWithSource,
       data: Some(
         InteractionResponseDataBuilder::new()
-          .content(format!("Sorry, an error occured: {}\nPlease contact an administrator about this.", err_message))
+          .content(format!(
+            "Sorry, an error occured: {}\nPlease contact an administrator about this.",
+            err_message
+          ))
           .flags(MessageFlags::EPHEMERAL)
           .build(),
       ),
