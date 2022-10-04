@@ -36,7 +36,6 @@ async fn main() -> anyhow::Result<()> {
       CommandOption::String(ChoiceCommandOptionData {
         name: "label".to_string(),
         description: "Role name that will be displayed in the select menu".to_string(),
-        required: true,
         ..Default::default()
       }),
       CommandOption::String(ChoiceCommandOptionData {

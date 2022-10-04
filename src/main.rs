@@ -121,8 +121,7 @@ async fn config_add_command(
     .find_map(|option| match &option.value {
       CommandOptionValue::String(label) if option.name == "label" => Some(label),
       _ => None,
-    })
-    .unwrap();
+    });
   let p_description = options.iter().find_map(|option| match &option.value {
     CommandOptionValue::String(label) if option.name == "description" => Some(label),
     _ => None,
@@ -197,6 +196,7 @@ async fn config_add_command(
 
   let guild_id = guild_id.to_string();
   let role_id = found.id.to_string();
+  let role_name = p_label.unwrap_or(&found.name);
   sqlx::query!(
     r#"
       INSERT INTO roles VALUES (?, ?, ?, ?)
@@ -207,7 +207,7 @@ async fn config_add_command(
     "#,
     guild_id,
     role_id,
-    p_label,
+    role_name,
     p_description
   )
   .execute(&state.pool)
