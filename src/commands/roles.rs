@@ -1,6 +1,9 @@
 use twilight_model::{
-  application::component::{
-    button::ButtonStyle, select_menu::SelectMenuOption, ActionRow, Button, Component, SelectMenu,
+  application::{
+    component::{
+      button::ButtonStyle, select_menu::SelectMenuOption, ActionRow, Button, Component, SelectMenu,
+    },
+    interaction::application_command::{CommandData, CommandOptionValue},
   },
   channel::message::MessageFlags,
   http::interaction::{InteractionResponse, InteractionResponseType},
@@ -82,7 +85,15 @@ pub async fn exec(
   })
 }
 
-pub fn persist() -> anyhow::Result<InteractionResponse> {
+pub fn persist(command: &Box<CommandData>) -> anyhow::Result<InteractionResponse> {
+  let p_content = command
+    .options
+    .iter()
+    .find_map(|option| match &option.value {
+      CommandOptionValue::String(content) if option.name == "content" => Some(content),
+      _ => None,
+    });
+
   let button = Component::ActionRow(ActionRow {
     components: vec![Component::Button(Button {
       custom_id: Some("selectRoles".to_string()),
@@ -96,7 +107,7 @@ pub fn persist() -> anyhow::Result<InteractionResponse> {
 
   let response = InteractionResponseDataBuilder::new()
     .components([button])
-    .content("GET ROLES HERE")
+    .content(p_content.unwrap_or(&"GET ROLES HERE".to_string()))
     .build();
 
   Ok(InteractionResponse {

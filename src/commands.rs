@@ -32,7 +32,7 @@ pub async fn handle_command(
       )
       .await
     }
-    (CommandType::ChatInput, "persist") => roles::persist(),
+    (CommandType::ChatInput, "persist") => roles::persist(command),
     (CommandType::ChatInput, "config") => match command.options.get(0) {
       Some(CommandDataOption {
         name,

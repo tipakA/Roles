@@ -23,6 +23,11 @@ async fn main() -> anyhow::Result<()> {
   )
   .dm_permission(false)
   .default_member_permissions(Permissions::MANAGE_ROLES)
+  .option(CommandOption::String(ChoiceCommandOptionData {
+    name: "content".to_string(),
+    description: "Text to display above the button".to_string(),
+    ..Default::default()
+  }))
   .build();
 
   let config_command = CommandBuilder::new(
