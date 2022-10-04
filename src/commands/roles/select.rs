@@ -11,7 +11,7 @@ use twilight_util::builder::InteractionResponseDataBuilder;
 use crate::{RoleData, State};
 
 #[tracing::instrument(ret, level = "debug", skip_all)]
-pub async fn roles_select(
+pub async fn exec(
   state: State,
   interaction: Box<InteractionCreate>,
   component: &MessageComponentInteractionData,

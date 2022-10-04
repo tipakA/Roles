@@ -25,7 +25,7 @@ pub async fn handle_command(
   let interaction = interaction.as_ref();
   match (command.kind, command.name.as_str()) {
     (CommandType::ChatInput, "roles") => {
-      roles::roles_command(
+      roles::exec(
         state,
         interaction.guild_id.unwrap(),
         interaction.author_id().unwrap(),
@@ -37,13 +37,13 @@ pub async fn handle_command(
         name,
         value: CommandOptionValue::SubCommand(options),
       }) if name == "add" => {
-        config::add::config_add_command(state, options, interaction.guild_id.unwrap()).await
+        config::add::exec(state, options, interaction.guild_id.unwrap()).await
       }
       Some(CommandDataOption {
         name,
         value: CommandOptionValue::SubCommand(options),
       }) if name == "remove" => {
-        config::remove::config_rm_command(state, options, interaction.guild_id.unwrap()).await
+        config::remove::exec(state, options, interaction.guild_id.unwrap()).await
       }
       _ => unreachable!(),
     },
@@ -59,7 +59,7 @@ pub async fn handle_menu(
 ) -> anyhow::Result<InteractionResponse> {
   match (component.component_type, component.custom_id.as_str()) {
     (ComponentType::SelectMenu, "roleMenu") => {
-      roles::select::roles_select(state, interaction, component).await
+      roles::select::exec(state, interaction, component).await
     }
     _ => unreachable!(),
   }

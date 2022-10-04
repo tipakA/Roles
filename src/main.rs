@@ -32,7 +32,7 @@ async fn main() -> anyhow::Result<()> {
 
   tracing_subscriber::fmt::init();
 
-  let (cluster, mut events) = Cluster::new(env::var("TOKEN")?, Intents::empty()).await?;
+  let (cluster, mut events) = Cluster::new(env::var("TOKEN")?, Intents::GUILDS).await?;
   let cluster = Arc::new(cluster);
 
   let cluster_spawn = Arc::clone(&cluster);

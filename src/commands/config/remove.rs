@@ -9,7 +9,7 @@ use twilight_util::builder::InteractionResponseDataBuilder;
 use crate::State;
 
 #[tracing::instrument(ret, skip_all)]
-pub async fn config_rm_command(
+pub async fn exec(
   state: State,
   options: &[CommandDataOption],
   guild_id: Id<GuildMarker>,

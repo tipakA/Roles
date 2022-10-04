@@ -14,7 +14,7 @@ use crate::{RoleData, State};
 pub mod select;
 
 #[tracing::instrument(ret, level = "debug", skip_all)]
-pub async fn roles_command(
+pub async fn exec(
   state: State,
   guild_id: Id<GuildMarker>,
   user_id: Id<UserMarker>,
