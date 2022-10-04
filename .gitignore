@@ -1,0 +1,8 @@
+# Credentials
+.env
+
+# Build
+/target
+
+# Data
+db.db
