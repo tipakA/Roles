@@ -17,7 +17,7 @@ use twilight_model::{
   gateway::payload::incoming::InteractionCreate,
   http::interaction::{InteractionResponse, InteractionResponseType},
   id::{
-    marker::{ApplicationMarker, GuildMarker},
+    marker::{ApplicationMarker, GuildMarker, UserMarker},
     Id,
   },
 };
@@ -39,13 +39,14 @@ struct RoleData {
 #[tracing::instrument(ret, level = "debug", skip_all)]
 async fn roles_command(
   state: State,
-  guild_id: Id<GuildMarker>
+  guild_id: Id<GuildMarker>,
+  user_id: Id<UserMarker>,
 ) -> anyhow::Result<InteractionResponse> {
-  let guild_id = guild_id.to_string();
+  let guild_id_string = guild_id.to_string();
   let self_roles: Vec<RoleData> = sqlx::query_as!(
     RoleData,
     "SELECT role_id, label, description FROM roles WHERE guild_id = ?",
-    guild_id,
+    guild_id_string,
   )
   .fetch_all(&state.pool)
   .await?;
@@ -62,6 +63,14 @@ async fn roles_command(
     });
   }
 
+  let member = state
+    .client
+    .guild_member(guild_id, user_id)
+    .exec()
+    .await?
+    .model()
+    .await?;
+
   let select = Component::ActionRow(ActionRow {
     components: vec![Component::SelectMenu(SelectMenu {
       custom_id: "roleMenu".to_string(),
@@ -72,7 +81,7 @@ async fn roles_command(
       options: self_roles
         .into_iter()
         .map(|role| SelectMenuOption {
-          default: false,
+          default: member.roles.contains(&role.role_id.parse().unwrap()),
           description: role.description,
           emoji: None,
           label: role.label,
@@ -189,7 +198,13 @@ async fn config_add_command(
   let guild_id = guild_id.to_string();
   let role_id = found.id.to_string();
   sqlx::query!(
-    "INSERT INTO roles VALUES (?, ?, ?, ?);",
+    r#"
+      INSERT INTO roles VALUES (?, ?, ?, ?)
+      ON CONFLICT (role_id) DO UPDATE SET
+        label = excluded.label,
+        description = excluded.description
+      ;
+    "#,
     guild_id,
     role_id,
     p_label,
@@ -257,20 +272,31 @@ async fn config_rm_command(
 async fn handle_command(
   state: State,
   command: &Box<CommandData>,
-  interaction: impl AsRef<InteractionCreate>
+  interaction: impl AsRef<InteractionCreate>,
 ) -> anyhow::Result<InteractionResponse> {
   let interaction = interaction.as_ref();
   match (command.kind, command.name.as_str()) {
-    (CommandType::ChatInput, "roles") => roles_command(state, interaction.guild_id.unwrap()).await,
+    (CommandType::ChatInput, "roles") => {
+      roles_command(
+        state,
+        interaction.guild_id.unwrap(),
+        interaction.author_id().unwrap(),
+      )
+      .await
+    }
     (CommandType::ChatInput, "config") => match command.options.get(0) {
       Some(CommandDataOption {
         name,
         value: CommandOptionValue::SubCommand(options),
-      }) if name == "add" => config_add_command(state, options, interaction.guild_id.unwrap()).await,
+      }) if name == "add" => {
+        config_add_command(state, options, interaction.guild_id.unwrap()).await
+      }
       Some(CommandDataOption {
         name,
         value: CommandOptionValue::SubCommand(options),
-      }) if name == "remove" => config_rm_command(state, options, interaction.guild_id.unwrap()).await,
+      }) if name == "remove" => {
+        config_rm_command(state, options, interaction.guild_id.unwrap()).await
+      }
       _ => unreachable!(),
     },
     _ => unreachable!(),

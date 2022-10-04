@@ -1,9 +1,12 @@
 use std::env;
 use twilight_http::client::ClientBuilder;
-use twilight_model::{application::command::{
-  BaseCommandOptionData, ChoiceCommandOptionData, CommandOption, CommandType,
-  OptionsCommandOptionData,
-}, guild::Permissions};
+use twilight_model::{
+  application::command::{
+    BaseCommandOptionData, ChoiceCommandOptionData, CommandOption, CommandType,
+    OptionsCommandOptionData,
+  },
+  guild::Permissions,
+};
 use twilight_util::builder::command::CommandBuilder;
 
 #[tokio::main]
@@ -22,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
   .default_member_permissions(Permissions::MANAGE_ROLES)
   .option(CommandOption::SubCommand(OptionsCommandOptionData {
     name: "add".to_string(),
-    description: "Add new selfrole".to_string(),
+    description: "Add new selfrole, or update existing one".to_string(),
     options: vec![
       CommandOption::Role(BaseCommandOptionData {
         name: "role".to_string(),
@@ -47,30 +50,31 @@ async fn main() -> anyhow::Result<()> {
   .option(CommandOption::SubCommand(OptionsCommandOptionData {
     name: "remove".to_string(),
     description: "Remove a selfrole".to_string(),
-    options: vec![
-      CommandOption::Role(BaseCommandOptionData {
-        name: "role".to_string(),
-        description: "Select a role".to_string(),
-        required: true,
-        ..Default::default()
-      }),
-    ],
+    options: vec![CommandOption::Role(BaseCommandOptionData {
+      name: "role".to_string(),
+      description: "Select a role".to_string(),
+      required: true,
+      ..Default::default()
+    })],
     ..Default::default()
   }))
   .build();
 
-  let client = ClientBuilder::new()
-    .token(env::var("TOKEN")?)
-    .build();
-  
-  let app_id = client.current_user_application()
+  let client = ClientBuilder::new().token(env::var("TOKEN")?).build();
+
+  let app_id = client
+    .current_user_application()
     .exec()
     .await?
     .model()
     .await?
     .id;
 
-  client.interaction(app_id).set_global_commands(&[roles_command, config_command]).exec().await?;
+  client
+    .interaction(app_id)
+    .set_global_commands(&[roles_command, config_command])
+    .exec()
+    .await?;
 
   Ok(())
 }
