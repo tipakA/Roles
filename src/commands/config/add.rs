@@ -14,6 +14,9 @@ pub async fn exec(
   options: &[CommandDataOption],
   guild_id: Id<GuildMarker>,
 ) -> anyhow::Result<InteractionResponse> {
+  let mut errored = false;
+  let mut formatted = "".to_string();
+
   let p_role = options
     .iter()
     .find_map(|option| match option.value {
@@ -46,32 +49,16 @@ pub async fn exec(
     .ok_or_else(|| anyhow::anyhow!("Couldn't find the selected role."))?;
 
   if found.managed {
-    let formatted = format!(
+    errored = true;
+    formatted = format!(
       "You cannot add a managed role <@&{}> to selfroles.",
       found.id
     );
-
-    let response = InteractionResponseDataBuilder::new()
-      .flags(MessageFlags::EPHEMERAL)
-      .content(formatted)
-      .build();
-
-    return Ok(InteractionResponse {
-      data: Some(response),
-      kind: InteractionResponseType::ChannelMessageWithSource,
-    });
   }
 
   if found.id.cast() == guild_id {
-    let response = InteractionResponseDataBuilder::new()
-      .flags(MessageFlags::EPHEMERAL)
-      .content("You cannot add @everyone role to selfroles.")
-      .build();
-
-    return Ok(InteractionResponse {
-      data: Some(response),
-      kind: InteractionResponseType::ChannelMessageWithSource,
-    });
+    errored = true;
+    formatted = "You cannot add @everyone role to selfroles.".to_string();
   }
 
   let my_roles = guild_roles
@@ -81,48 +68,43 @@ pub async fn exec(
   let my_highest = my_roles.max().unwrap();
 
   if my_highest <= found {
-    let formatted = format!(
+    errored = true;
+    formatted = format!(
       "You cannot add role <@&{}> to selfroles as it is higher than my highest role <@&{}>.",
       found.id, my_highest.id
     );
-
-    let response = InteractionResponseDataBuilder::new()
-      .flags(MessageFlags::EPHEMERAL)
-      .content(formatted)
-      .build();
-
-    return Ok(InteractionResponse {
-      data: Some(response),
-      kind: InteractionResponseType::ChannelMessageWithSource,
-    });
   }
 
-  let guild_id = guild_id.to_string();
-  let role_id = found.id.to_string();
-  let role_name = p_label.unwrap_or(&found.name);
-  sqlx::query!(
-    r#"
-      INSERT INTO roles VALUES (?, ?, ?, ?)
-      ON CONFLICT (role_id) DO UPDATE SET
-        label = excluded.label,
-        description = excluded.description
-      ;
-    "#,
-    guild_id,
-    role_id,
-    role_name,
-    p_description
-  )
-  .execute(&state.pool)
-  .await?;
+  let mut response = InteractionResponseDataBuilder::new();
 
-  let formatted = format!("Successfully added selfrole <@&{}>.", found.id);
-  let response = InteractionResponseDataBuilder::new()
-    .content(formatted)
-    .build();
+  if errored {
+    response = response.content(formatted).flags(MessageFlags::EPHEMERAL);
+  } else {
+    let guild_id = guild_id.to_string();
+    let role_id = found.id.to_string();
+    let role_name = p_label.unwrap_or(&found.name);
+    sqlx::query!(
+      r#"
+        INSERT INTO roles VALUES (?, ?, ?, ?)
+        ON CONFLICT (role_id) DO UPDATE SET
+          label = excluded.label,
+          description = excluded.description
+        ;
+      "#,
+      guild_id,
+      role_id,
+      role_name,
+      p_description
+    )
+    .execute(&state.pool)
+    .await?;
+
+    formatted = format!("Successfully added selfrole <@&{}>.", found.id);
+    response = response.content(formatted);
+  }
 
   return Ok(InteractionResponse {
-    data: Some(response),
+    data: Some(response.build()),
     kind: InteractionResponseType::ChannelMessageWithSource,
   });
 }
