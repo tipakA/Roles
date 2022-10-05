@@ -70,7 +70,7 @@ pub async fn exec(
   if my_highest <= found {
     errored = true;
     formatted = format!(
-      "You cannot add role <@&{}> to selfroles as it is higher than my highest role <@&{}>.",
+      "You cannot add role <@&{}> to selfroles as it is higher than, or equally high as my highest role <@&{}>.",
       found.id, my_highest.id
     );
   }
