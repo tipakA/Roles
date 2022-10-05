@@ -32,7 +32,9 @@ pub async fn exec(
   .fetch_optional(&state.pool)
   .await?;
 
+  let mut ephemeral = false;
   let formatted = if count.is_none() {
+    ephemeral = true;
     format!(
       "Role <@&{}> is not a selfrole, so it cannot be removed.",
       p_role
@@ -41,13 +43,14 @@ pub async fn exec(
     format!("Successfully removed selfrole <@&{}>", role_id)
   };
 
-  let response = InteractionResponseDataBuilder::new()
-    .flags(MessageFlags::EPHEMERAL)
-    .content(formatted)
-    .build();
+  let mut response = InteractionResponseDataBuilder::new().content(formatted);
+
+  if ephemeral {
+    response = response.flags(MessageFlags::EPHEMERAL);
+  };
 
   Ok(InteractionResponse {
-    data: Some(response),
+    data: Some(response.build()),
     kind: InteractionResponseType::ChannelMessageWithSource,
   })
 }
