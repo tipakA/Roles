@@ -1,6 +1,5 @@
 use twilight_model::{
   application::interaction::application_command::{CommandDataOption, CommandOptionValue},
-  channel::message::MessageFlags,
   http::interaction::{InteractionResponse, InteractionResponseType},
   id::{marker::GuildMarker, Id},
 };
@@ -32,25 +31,18 @@ pub async fn exec(
   .fetch_optional(&state.pool)
   .await?;
 
-  let mut ephemeral = false;
-  let formatted = if count.is_none() {
-    ephemeral = true;
-    format!(
-      "Role <@&{}> is not a selfrole, so it cannot be removed.",
-      p_role
-    )
-  } else {
-    format!("Successfully removed selfrole <@&{}>", role_id)
-  };
+  anyhow::ensure!(
+    !count.is_none(),
+    "Role <@&{}> is not a selfrole, so it cannot be removed.",
+    p_role
+  );
 
-  let mut response = InteractionResponseDataBuilder::new().content(formatted);
-
-  if ephemeral {
-    response = response.flags(MessageFlags::EPHEMERAL);
-  };
+  let response = InteractionResponseDataBuilder::new()
+    .content(format!("Successfully removed selfrole <@&{}>", role_id))
+    .build();
 
   Ok(InteractionResponse {
-    data: Some(response.build()),
+    data: Some(response),
     kind: InteractionResponseType::ChannelMessageWithSource,
   })
 }
