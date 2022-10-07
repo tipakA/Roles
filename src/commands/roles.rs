@@ -33,17 +33,7 @@ pub async fn exec(
   .fetch_all(&state.pool)
   .await?;
 
-  if self_roles.is_empty() {
-    let response = InteractionResponseDataBuilder::new()
-      .flags(MessageFlags::EPHEMERAL)
-      .content("Sorry, there are no roles to pick from. Contact server administrator to check if this is intentional.")
-      .build();
-
-    return Ok(InteractionResponse {
-      data: Some(response),
-      kind: InteractionResponseType::ChannelMessageWithSource,
-    });
-  }
+  anyhow::ensure!(!self_roles.is_empty(), "Sorry, there are no roles to pick from. Contact server administrator to check if this is intentional.");
 
   let member = state
     .client

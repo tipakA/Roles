@@ -1,6 +1,5 @@
 use twilight_model::{
   application::interaction::application_command::{CommandDataOption, CommandOptionValue},
-  channel::message::MessageFlags,
   http::interaction::{InteractionResponse, InteractionResponseType},
   id::{marker::GuildMarker, Id},
 };
@@ -14,9 +13,6 @@ pub async fn exec(
   options: &[CommandDataOption],
   guild_id: Id<GuildMarker>,
 ) -> anyhow::Result<InteractionResponse> {
-  let mut errored = false;
-  let mut formatted = "".to_string();
-
   let p_role = options
     .iter()
     .find_map(|option| match option.value {
@@ -48,63 +44,54 @@ pub async fn exec(
     .find(|role| role.id == p_role)
     .ok_or_else(|| anyhow::anyhow!("Couldn't find the selected role."))?;
 
-  if found.managed {
-    errored = true;
-    formatted = format!(
-      "You cannot add a managed role <@&{}> to selfroles.",
-      found.id
-    );
-  }
+  anyhow::ensure!(
+    !found.managed,
+    "You cannot add a managed role <@&{}> to selfroles.",
+    found.id
+  );
 
-  if found.id.cast() == guild_id {
-    errored = true;
-    formatted = "You cannot add @everyone role to selfroles.".to_string();
-  }
+  anyhow::ensure!(
+    found.id.cast() != guild_id,
+    "You cannot add @everyone role to selfroles."
+  );
 
-  let my_roles = guild_roles
+  let my_highest = guild_roles
     .iter()
-    .filter(|role| me.roles.contains(&role.id));
+    .filter(|role| me.roles.contains(&role.id))
+    .max();
 
-  let my_highest = my_roles.max().unwrap();
+  anyhow::ensure!(
+    my_highest > Some(found),
+    "You cannot add role <@&{}> to selfroles as it is higher than, or equally high as my highest role <@&{}>.",
+    found.id,
+    my_highest.map(|r| r.id).unwrap_or(guild_id.cast())
+  );
 
-  if my_highest <= found {
-    errored = true;
-    formatted = format!(
-      "You cannot add role <@&{}> to selfroles as it is higher than, or equally high as my highest role <@&{}>.",
-      found.id, my_highest.id
-    );
-  }
+  let guild_id = guild_id.to_string();
+  let role_id = found.id.to_string();
+  let role_name = p_label.unwrap_or(&found.name);
+  sqlx::query!(
+    r#"
+      INSERT INTO roles VALUES (?, ?, ?, ?)
+      ON CONFLICT (role_id) DO UPDATE SET
+        label = excluded.label,
+        description = excluded.description
+      ;
+    "#,
+    guild_id,
+    role_id,
+    role_name,
+    p_description
+  )
+  .execute(&state.pool)
+  .await?;
 
-  let mut response = InteractionResponseDataBuilder::new();
-
-  if errored {
-    response = response.content(formatted).flags(MessageFlags::EPHEMERAL);
-  } else {
-    let guild_id = guild_id.to_string();
-    let role_id = found.id.to_string();
-    let role_name = p_label.unwrap_or(&found.name);
-    sqlx::query!(
-      r#"
-        INSERT INTO roles VALUES (?, ?, ?, ?)
-        ON CONFLICT (role_id) DO UPDATE SET
-          label = excluded.label,
-          description = excluded.description
-        ;
-      "#,
-      guild_id,
-      role_id,
-      role_name,
-      p_description
-    )
-    .execute(&state.pool)
-    .await?;
-
-    formatted = format!("Successfully added selfrole <@&{}>.", found.id);
-    response = response.content(formatted);
-  }
+  let response = InteractionResponseDataBuilder::new()
+    .content(format!("Successfully added selfrole <@&{}>.", found.id))
+    .build();
 
   return Ok(InteractionResponse {
-    data: Some(response.build()),
+    data: Some(response),
     kind: InteractionResponseType::ChannelMessageWithSource,
   });
 }
