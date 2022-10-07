@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use twilight_http::{api_error::ApiError, error::ErrorType};
 use twilight_model::{
   application::interaction::InteractionData,
@@ -8,6 +9,13 @@ use twilight_model::{
 use twilight_util::builder::InteractionResponseDataBuilder;
 
 use crate::{commands, State};
+
+fn format_error(error: impl Display) -> String {
+  format!(
+    "Sorry, an unexpected error occured: {}\nPlease contact an administrator about this.",
+    error
+  )
+}
 
 #[tracing::instrument(ret, skip_all)]
 pub async fn interaction_dispatcher(
@@ -24,25 +32,25 @@ pub async fn interaction_dispatcher(
     _ => unreachable!(),
   }
   .unwrap_or_else(|err| {
-    let err_message = match err.downcast::<twilight_http::Error>() {
-      Ok(e) => match e.kind() {
+    let err_message = if let Some(e) = err.downcast_ref::<twilight_http::Error>() {
+      match e.kind() {
         ErrorType::Response {
           error: ApiError::General(error),
           ..
-        } => error.message.clone(),
-        _ => e.to_string(),
-      },
-      Err(e) => e.to_string(),
+        } => format_error(&error.message),
+        _ => format_error(e),
+      }
+    } else if let Some(e) = err.downcast_ref::<sqlx::Error>() {
+      format_error(e)
+    } else {
+      err.to_string()
     };
 
     InteractionResponse {
       kind: InteractionResponseType::ChannelMessageWithSource,
       data: Some(
         InteractionResponseDataBuilder::new()
-          .content(format!(
-            "Sorry, an error occured: {}\nPlease contact an administrator about this.",
-            err_message
-          ))
+          .content(err_message)
           .flags(MessageFlags::EPHEMERAL)
           .build(),
       ),
