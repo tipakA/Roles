@@ -61,7 +61,7 @@ pub async fn exec(
     .max();
 
   anyhow::ensure!(
-    my_highest < Some(found),
+    my_highest > Some(found),
     "You cannot add role <@&{}> to selfroles as it is higher than, or equally high as my highest role <@&{}>.",
     found.id,
     my_highest.map(|r| r.id).unwrap_or(guild_id.cast())
