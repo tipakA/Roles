@@ -54,12 +54,12 @@ async fn main() -> anyhow::Result<()> {
     name_localizations: Some(
       vec![gtv(&ctx, "pl", "cmd::persist::content:name")]
         .into_iter()
-        .collect()
+        .collect(),
     ),
     description_localizations: Some(
       vec![gtv(&ctx, "pl", "cmd::persist::content:desc")]
         .into_iter()
-        .collect()
+        .collect(),
     ),
     ..Default::default()
   }))
@@ -85,13 +85,13 @@ async fn main() -> anyhow::Result<()> {
         name_localizations: Some(
           vec![gtv(&ctx, "pl", "cmd::config::add::role:name")]
             .into_iter()
-            .collect()
+            .collect(),
         ),
         description_localizations: Some(
           vec![gtv(&ctx, "pl", "cmd::config::add::role:desc")]
             .into_iter()
-            .collect()
-        )
+            .collect(),
+        ),
       }),
       CommandOption::String(ChoiceCommandOptionData {
         name: gdv(&ctx, "cmd::config::add::label:name"),
@@ -99,12 +99,12 @@ async fn main() -> anyhow::Result<()> {
         name_localizations: Some(
           vec![gtv(&ctx, "pl", "cmd::config::add::label:name")]
             .into_iter()
-            .collect()
+            .collect(),
         ),
         description_localizations: Some(
           vec![gtv(&ctx, "pl", "cmd::config::add::label:desc")]
             .into_iter()
-            .collect()
+            .collect(),
         ),
         ..Default::default()
       }),
@@ -114,12 +114,12 @@ async fn main() -> anyhow::Result<()> {
         name_localizations: Some(
           vec![gtv(&ctx, "pl", "cmd::config::add::description:name")]
             .into_iter()
-            .collect()
+            .collect(),
         ),
         description_localizations: Some(
           vec![gtv(&ctx, "pl", "cmd::config::add::description:desc")]
             .into_iter()
-            .collect()
+            .collect(),
         ),
         ..Default::default()
       }),
@@ -127,12 +127,12 @@ async fn main() -> anyhow::Result<()> {
     name_localizations: Some(
       vec![gtv(&ctx, "pl", "cmd::config::add:name")]
         .into_iter()
-        .collect()
+        .collect(),
     ),
     description_localizations: Some(
       vec![gtv(&ctx, "pl", "cmd::config::add:desc")]
         .into_iter()
-        .collect()
+        .collect(),
     ),
   }))
   .option(CommandOption::SubCommand(OptionsCommandOptionData {
@@ -145,24 +145,24 @@ async fn main() -> anyhow::Result<()> {
       name_localizations: Some(
         vec![gtv(&ctx, "pl", "cmd::config::remove::role:name")]
           .into_iter()
-          .collect()
+          .collect(),
       ),
       description_localizations: Some(
         vec![gtv(&ctx, "pl", "cmd::config::remove::role:desc")]
           .into_iter()
-          .collect()
+          .collect(),
       ),
     })],
     name_localizations: Some(
       vec![gtv(&ctx, "pl", "cmd::config::remove:name")]
         .into_iter()
-        .collect()
+        .collect(),
     ),
     description_localizations: Some(
       vec![gtv(&ctx, "pl", "cmd::config::remove:desc")]
         .into_iter()
-        .collect()
-    )
+        .collect(),
+    ),
   }))
   .name_localizations(vec![gtv(&ctx, "pl", "cmd::config:name")])
   .description_localizations(vec![gtv(&ctx, "pl", "cmd::config:desc")])
