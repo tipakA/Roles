@@ -10,6 +10,7 @@ use twilight_model::{
 
 pub mod commands;
 pub mod events;
+pub mod util;
 
 #[derive(Debug, Clone)]
 pub struct State {

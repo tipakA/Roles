@@ -8,7 +8,7 @@ use twilight_model::{
 };
 use twilight_util::builder::InteractionResponseDataBuilder;
 
-use crate::{RoleData, State};
+use crate::{util::i18n::format_list_and, RoleData, State};
 
 #[tracing::instrument(ret, level = "debug", skip_all)]
 pub async fn exec(
@@ -54,15 +54,18 @@ pub async fn exec(
     .exec()
     .await?;
 
-  let mapped = component
-    .values
-    .iter()
-    .map(|role| format!("<@&{}>", role))
-    .collect::<Vec<_>>();
-  let out = if mapped.is_empty() {
+  let mapped = component.values.iter().map(|role| format!("<@&{}>", role));
+  // .collect::<Vec<_>>();
+  let out = if mapped.size_hint().1 == Some(0) {
     String::from("Cleared your roles.")
   } else {
-    format!("Set your roles to {}.", mapped.join(", "))
+    format!(
+      "Set your roles to {}.",
+      format_list_and(
+        interaction.locale.as_ref().unwrap().parse().unwrap(),
+        mapped
+      )
+    )
   };
 
   let response = InteractionResponseDataBuilder::new()
