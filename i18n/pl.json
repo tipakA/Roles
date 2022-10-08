@@ -1,0 +1,26 @@
+{
+  "cmd::roles:name": "role",
+  "cmd::roles:desc": "Wybierz swoje role",
+
+  "cmd::config:name": "opcje",
+  "cmd::config:desc": "Zarządzaj rolami dla tego serwera",
+
+  "cmd::config::add:name": "dodaj",
+  "cmd::config::add:desc": "Dodaj nową rolę, lub zaktualizuj istniejącą",
+  "cmd::config::add::role:name": "rola",
+  "cmd::config::add::role:desc": "Wybierz rolę",
+  "cmd::config::add::label:name": "nazwa",
+  "cmd::config::add::label:desc": "Nazwa roli wyświetlana w menu",
+  "cmd::config::add::description:name": "opis",
+  "cmd::config::add::description:desc": "Opcjonalny opis wyświetlany w menu pod nazwą",
+
+  "cmd::config::remove:name": "usuń",
+  "cmd::config::remove:desc": "Usuń rolę",
+  "cmd::config::remove::role:name": "role",
+  "cmd::config::remove::role:desc": "Wybierz rolę",
+
+  "cmd::persist:name": "przycisk",
+  "cmd::persist:desc": "Stwórz przycisk do wybierania ról",
+  "cmd::persist::content:name": "wiadomość",
+  "cmd::persist::content:desc": "Wiadomość do umiesczenia nad przyciskiem"
+}

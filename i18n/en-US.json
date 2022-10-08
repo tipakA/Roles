@@ -1,0 +1,26 @@
+{
+  "cmd::roles:name": "roles",
+  "cmd::roles:desc": "Select roles you want",
+
+  "cmd::config:name": "config",
+  "cmd::config:desc": "Manage selfroles for the server",
+
+  "cmd::config::add:name": "add",
+  "cmd::config::add:desc": "Add new selfrole, or update existing one",
+  "cmd::config::add::role:name": "role",
+  "cmd::config::add::role:desc": "Select a role",
+  "cmd::config::add::label:name": "label",
+  "cmd::config::add::label:desc": "Role name that will be displayed in the select menu",
+  "cmd::config::add::description:name": "description",
+  "cmd::config::add::description:desc": "Optional description displayed in the select menu",
+
+  "cmd::config::remove:name": "remove",
+  "cmd::config::remove:desc": "Remove a selfrole",
+  "cmd::config::remove::role:name": "role",
+  "cmd::config::remove::role:desc": "Select a role",
+
+  "cmd::persist:name": "persist",
+  "cmd::persist:desc": "Make a button to get roles",
+  "cmd::persist::content:name": "content",
+  "cmd::persist::content:desc": "Text to display above the button"
+}
