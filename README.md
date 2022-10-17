@@ -24,3 +24,10 @@ Remove a role from the list.
 `/persist`
 
 Create a button to invoke the menu without using the command. Useful for locked channels.
+
+# Selfhosting
+
+As this is quite a small app, selfhosting it shouldn't be hard.
+  - Have rust installed
+  - Rename `.env.example` to `.env` (and probably set your actual token there)
+  - Run `cargo run --release` to build and run the app.
