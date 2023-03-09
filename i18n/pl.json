@@ -22,5 +22,5 @@
   "cmd::persist:name": "przycisk",
   "cmd::persist:desc": "Stwórz przycisk do wybierania ról",
   "cmd::persist::content:name": "wiadomość",
-  "cmd::persist::content:desc": "Wiadomość do umiesczenia nad przyciskiem"
+  "cmd::persist::content:desc": "Wiadomość do umieszczenia nad przyciskiem"
 }
