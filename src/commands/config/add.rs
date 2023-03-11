@@ -70,6 +70,25 @@ pub async fn exec(
   let guild_id = guild_id.to_string();
   let role_id = found.id.to_string();
   let role_name = p_label.unwrap_or(&found.name);
+
+  let role_configured = sqlx::query!(
+    r#"
+      SELECT EXISTS(
+        SELECT 1 FROM roles WHERE role_id = ?
+      ) AS "existing!: i32"
+    "#,
+    role_id
+  )
+  .fetch_one(&state.pool)
+  .await?;
+
+  let verb;
+  match role_configured.existing {
+    0 => verb = "added",
+    1 => verb = "updated",
+    _ => unreachable!(),
+  }
+
   sqlx::query!(
     r#"
       INSERT INTO roles VALUES (?, ?, ?, ?)
@@ -87,7 +106,11 @@ pub async fn exec(
   .await?;
 
   let response = InteractionResponseDataBuilder::new()
-    .content(format!("Successfully added selfrole <@&{}>.", found.id))
+    .content(format!(
+      "Successfully {} selfrole <@&{}>.",
+      verb.to_string(),
+      found.id
+    ))
     .build();
 
   return Ok(InteractionResponse {
