@@ -34,6 +34,19 @@ pub async fn exec(
   .await?;
 
   anyhow::ensure!(!self_roles.is_empty(), "Sorry, there are no roles to pick from. Contact server administrator to check if this is intentional.");
+  // anyhow::ensure!(!self_roles.is_empty(), localize(locale, "noRoles"));
+
+  let guild_roles = state.client.roles(guild_id).exec().await?.model().await?;
+  let mut sorted_self_roles = self_roles;
+  sorted_self_roles.sort_unstable_by(|a, b| {
+    let a_role_idx = guild_roles.iter().position(|x| x.id.to_string() == a.role_id).unwrap();
+    let b_role_idx = guild_roles.iter().position(|x| x.id.to_string() == b.role_id).unwrap();
+
+    let a_role = guild_roles.get(a_role_idx).unwrap();
+    let b_role = guild_roles.get(b_role_idx).unwrap();
+
+    b_role.partial_cmp(a_role).unwrap_or(std::cmp::Ordering::Equal)
+  });
 
   let member = state
     .client
@@ -47,10 +60,10 @@ pub async fn exec(
     components: vec![Component::SelectMenu(SelectMenu {
       custom_id: "roleMenu".to_string(),
       disabled: false,
-      max_values: Some(self_roles.len().try_into().unwrap()),
+      max_values: Some(sorted_self_roles.len().try_into().unwrap()),
       min_values: Some(0),
       placeholder: Some("Select your roles".to_string()),
-      options: self_roles
+      options: sorted_self_roles
         .into_iter()
         .map(|role| SelectMenuOption {
           default: member.roles.contains(&role.role_id.parse().unwrap()),
