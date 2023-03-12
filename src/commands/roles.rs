@@ -79,7 +79,7 @@ pub async fn exec(
   let response = InteractionResponseDataBuilder::new()
     .components([select])
     .flags(MessageFlags::EPHEMERAL)
-    .content("(De)select all the roles you want from the menu below, and click out of the menu to confirm.")
+    .content("Select or deselect all the roles you want from the menu below, and click out of the menu to confirm.")
     .build();
 
   Ok(InteractionResponse {
